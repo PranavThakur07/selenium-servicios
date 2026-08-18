@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servicios Booking Monitor - Forensic Dashboard</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(31, 41, 55, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(99, 102, 241, 0.5);
+      
+      --accent-indigo: #6366f1;
+      --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-subtle: #6b7280;
+      
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.5;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+      padding-bottom: 60px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2937;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 24px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--accent-indigo-glow);
+    }
+
+    .logo-badge svg {
+      width: 26px;
+      height: 26px;
+      color: #fff;
+    }
+
+    .brand-info h1 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff, #d1d5db);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-info p {
+      color: var(--text-muted);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-staging {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: var(--accent-emerald);
+      font-weight: 500;
+    }
+
+    .pulsing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-indigo), #4f46e5);
+      border: none;
+      box-shadow: 0 2px 10px var(--accent-indigo-glow);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      box-shadow: 0 4px 15px var(--accent-indigo-glow);
+    }
+
+    /* Clocks Bar */
+    .time-bar {
+      display: flex;
+      gap: 20px;
+      background: rgba(17, 24, 39, 0.5);
+      border: 1px solid var(--border-color);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .time-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+    }
+
+    .time-item strong {
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+
+    .window-badge {
+      margin-left: auto;
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-amber);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-indigo), transparent);
+    }
+
+    .card-emerald::before { background: linear-gradient(90deg, var(--accent-emerald), transparent); }
+    .card-cyan::before { background: linear-gradient(90deg, var(--accent-cyan), transparent); }
+    .card-amber::before { background: linear-gradient(90deg, var(--accent-amber), transparent); }
+    .card-purple::before { background: linear-gradient(90deg, var(--accent-purple), transparent); }
+
+    .metric-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .metric-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .metric-value {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+
+    .metric-sub {
+      font-size: 12px;
+      color: var(--text-subtle);
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 18px;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      color: var(--accent-indigo);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent-indigo);
+      box-shadow: 0 0 8px var(--accent-indigo);
+    }
+
+    .tab-badge {
+      background: rgba(99, 102, 241, 0.18);
+      color: var(--accent-indigo);
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* Data Container & Tables */
+    .content-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .search-filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .input-search {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      width: 240px;
+      transition: border-color 0.2s ease;
+    }
+
+    .input-search:focus {
+      border-color: var(--accent-indigo);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-danger {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-info {
+      background: rgba(6, 182, 212, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .badge-neutral {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mono-cell {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent-cyan);
+    }
+
+    .timestamp-cell {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.3;
+    }
+
+    /* Modal for Raw JSON View */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 850px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-header h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      background: #080c14;
+    }
+
+    .json-code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #e5e7eb;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .modal-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: var(--bg-secondary);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--accent-emerald);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      font-size: 13px;
+      display: none;
+      z-index: 10000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Top Header -->
+    <header>
+      <div class="brand-section">
+        <div class="logo-badge">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1>Servicios Forensic Booking Monitor</h1>
+          <p>
+            <span class="tag-staging" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">PRODUCTION</span>
+            <span>Target: <code>admin.coyoacan.io</code></span>
+            <span>•</span>
+            <span id="lastRefresh">Connecting...</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="live-indicator">
+          <div class="pulsing-dot"></div>
+          <span>Active Polling</span>
+        </div>
+        <button class="btn btn-primary" onclick="loadAllData()">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh Now
+        </button>
+      </div>
+    </header>
+
+    <!-- Clocks & Investigation Window Bar -->
+    <div class="time-bar">
+      <div class="time-item">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span>Madrid Time (CET/CEST):</span>
+        <strong id="madridClock">--:--:--</strong>
+      </div>
+      <div class="time-item">
+        <span>Local Machine Time:</span>
+        <strong id="localClock">--:--:--</strong>
+      </div>
+      <div class="window-badge">
+        🎯 Critical Target Window: 00:00 – 02:00 Madrid Time
+      </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card card-cyan">
+        <div class="metric-header">
+          <span class="metric-title">Tracked Bookings</span>
+          <div class="metric-icon">📦</div>
+        </div>
+        <div class="metric-value" id="kpiTotalTracked">0</div>
+        <div class="metric-sub">Total unique IDs in database/baseline</div>
+      </div>
+
+      <div class="metric-card card-emerald">
+        <div class="metric-header">
+          <span class="metric-title">New Bookings Detected</span>
+          <div class="metric-icon">⚡</div>
+        </div>
+        <div class="metric-value" id="kpiNewDetected">0</div>
+        <div class="metric-sub">Forensically logged new entries</div>
+      </div>
+
+      <div class="metric-card card-purple">
+        <div class="metric-header">
+          <span class="metric-title">Polling Cycles</span>
+          <div class="metric-icon">🔄</div>
+        </div>
+        <div class="metric-value" id="kpiTotalCycles">0</div>
+        <div class="metric-sub">API checks executed</div>
+      </div>
+
+      <div class="metric-card card-amber">
+        <div class="metric-header">
+          <span class="metric-title">API Health</span>
+          <div class="metric-icon">🩺</div>
+        </div>
+        <div class="metric-value" id="kpiApiStatus">100%</div>
+        <div class="metric-sub" id="kpiAvgLatency">Avg latency: -- ms</div>
+      </div>
+    </div>
+
+    <!-- Tab Buttons -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('newBookings')">
+        <span>⚡ Newly Detected Bookings</span>
+        <span class="tab-badge" id="tabBadgeNew">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('timeline')">
+        <span>⏱️ Polling Timeline & Health Audit</span>
+        <span class="tab-badge" id="tabBadgeCycles">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('seenIds')">
+        <span>📋 Baseline & Seen ID Registry</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: Newly Detected Bookings -->
+    <div id="panelNewBookings" class="content-panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Forensic Evidence: Detected Bookings</h2>
+          <p style="color: var(--text-muted); font-size: 13px;">Timestamped arrivals captured by the monitoring process.</p>
+        </div>
+        <div class="search-filter-bar">
+          <input type="text" id="searchNew" class="input-search" placeholder="Search by ID, Name, Ref..." oninput="renderNewBookingsTable()">
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="tableNewBookings">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Customer Ref</th>
+              <th>Status</th>
+              <th>Passenger</th>
+              <th>Pickup &rarr; Dropoff</th>
+              <th>Flight</th>
+              <th>Created At (API)</th>
+              <th>First Observed At (Local)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyNewBookings">
+            <tr>
+              <td colspan="9" class="empty-state">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <p>No new bookings detected yet since baseline initialization.</p>
+                <p style="font-size: 12px; margin-top: 4px;">The monitor is polling continuously. When a booking appears, it will show up here instantly.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: Polling Timeline Audit -->
+    <div id="panelTimeline" class="content-panel" style="display: none;">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">API Polling Timeline & Health Log</h2>
+          <p style="color: var(--text-muted); font-size: 13px;">Complete per-cycle audit trail recorded in <code>polling_timeline.csv</code>.</p>
+        </div>
+        <div class="search-filter-bar">
+          <input type="text" id="searchTimeline" class="input-search" placeholder="Filter by Cycle, Status, Error..." oninput="renderTimelineTable()">
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="tableTimeline">
+          <thead>
+            <tr>
+              <th>Cycle #</th>
+              <th>Timestamp</th>
+              <th>HTTP Status</th>
+              <th>Response Time</th>
+              <th>API Booking Count</th>
+              <th>New Detected</th>
+              <th>Log / Error Detail</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyTimeline">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: Seen ID & Baseline Registry -->
+    <div id="panelSeenIds" class="content-panel" style="display: none;">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Tracked Bookings & Baseline Registry</h2>
+          <p style="color: var(--text-muted); font-size: 13px;">Complete registry of all tracked bookings with exact detection timestamps and route details.</p>
+        </div>
+        <div class="search-filter-bar">
+          <input type="text" id="searchSeen" class="input-search" placeholder="Search by ID, Passenger, Ref..." oninput="renderSeenIdsTable()">
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="tableSeenIds">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Cust Ref</th>
+              <th>Status</th>
+              <th>Passenger</th>
+              <th>Pickup &rarr; Dropoff</th>
+              <th>Created At (API)</th>
+              <th>Spotted At (Local Time)</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbodySeenIds">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Raw JSON Modal -->
+  <div id="jsonModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Booking Raw JSON Payload</h3>
+        <button class="btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <pre class="json-code" id="modalJsonContent"></pre>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="copyModalJson()">📋 Copy JSON</button>
+        <button class="btn btn-primary" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Copied to clipboard!</div>
+
+  <script>
+    // State
+    let newBookingsData = [];
+    let timelineData = [];
+    let seenIdsData = {};
+    let fullJsonlData = [];
+
+    // Clocks
+    function updateClocks() {
+      const now = new Date();
+      
+      // Madrid Time
+      const madridStr = now.toLocaleTimeString('en-GB', { timeZone: 'Europe/Madrid', hour12: false });
+      document.getElementById('madridClock').textContent = madridStr;
+      
+      // Local Time
+      const localStr = now.toLocaleTimeString([], { hour12: false });
+      document.getElementById('localClock').textContent = localStr;
+    }
+    setInterval(updateClocks, 1000);
+    updateClocks();
+
+    // Tab Navigation
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.content-panel').forEach(p => p.style.display = 'none');
+
+      if (tabId === 'newBookings') {
+        document.querySelector('.tabs-nav button:nth-child(1)').classList.add('active');
+        document.getElementById('panelNewBookings').style.display = 'block';
+      } else if (tabId === 'timeline') {
+        document.querySelector('.tabs-nav button:nth-child(2)').classList.add('active');
+        document.getElementById('panelTimeline').style.display = 'block';
+      } else if (tabId === 'seenIds') {
+        document.querySelector('.tabs-nav button:nth-child(3)').classList.add('active');
+        document.getElementById('panelSeenIds').style.display = 'block';
+      }
+    }
+
+    // CSV Parser
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      if (lines.length <= 1) return [];
+      
+      // Simple robust CSV line parser handling quotes
+      function parseLine(line) {
+        const result = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i];
+          if (c === '"') {
+            if (inQuotes && line[i+1] === '"') {
+              cur += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (c === ',' && !inQuotes) {
+            result.push(cur);
+            cur = '';
+          } else {
+            cur += c;
+          }
+        }
+        result.push(cur);
+        return result;
+      }
+
+      const headers = parseLine(lines[0]);
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const vals = parseLine(lines[i]);
+        const obj = {};
+        headers.forEach((h, idx) => {
+          obj[h] = vals[idx] !== undefined ? vals[idx] : '';
+        });
+        rows.push(obj);
+      }
+      return rows;
+    }
+
+    // Load Data from output files
+    async function loadAllData() {
+      const ts = new Date().getTime();
+      let hasTimeline = false;
+      let hasBookings = false;
+      let hasSeenIds = false;
+
+      // 1. Fetch Timeline CSV
+      try {
+        const res = await fetch(`output/polling_timeline.csv?_=${ts}`);
+        if (res.ok) {
+          const txt = await res.text();
+          timelineData = parseCSV(txt).reverse(); // newest first
+          hasTimeline = true;
+        }
+      } catch (e) {}
+
+      // 2. Fetch New Bookings CSV
+      try {
+        const res = await fetch(`output/booking_monitor.csv?_=${ts}`);
+        if (res.ok) {
+          const txt = await res.text();
+          newBookingsData = parseCSV(txt).reverse();
+          hasBookings = true;
+        }
+      } catch (e) {}
+
+      // 3. Fetch Seen IDs JSON
+      try {
+        const res = await fetch(`output/seen_booking_ids.json?_=${ts}`);
+        if (res.ok) {
+          seenIdsData = await res.json();
+          hasSeenIds = true;
+        }
+      } catch (e) {}
+
+      // 4. Fetch JSONL
+      try {
+        const res = await fetch(`output/bookings.jsonl?_=${ts}`);
+        if (res.ok) {
+          const txt = await res.text();
+          fullJsonlData = txt.trim().split('\n').filter(l => l.trim()).map(l => {
+            try { return JSON.parse(l); } catch(err) { return null; }
+          }).filter(Boolean);
+        }
+      } catch (e) {}
+
+      updateKPIs();
+      renderNewBookingsTable();
+      renderTimelineTable();
+      renderSeenIdsTable();
+
+      document.getElementById('lastRefresh').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+    }
+
+    // Update Top Counters
+    function updateKPIs() {
+      const totalTracked = Object.keys(seenIdsData).length;
+      document.getElementById('kpiTotalTracked').textContent = totalTracked;
+
+      const newDetected = newBookingsData.length;
+      document.getElementById('kpiNewDetected').textContent = newDetected;
+      document.getElementById('tabBadgeNew').textContent = newDetected;
+
+      const totalCycles = timelineData.length;
+      document.getElementById('kpiTotalCycles').textContent = totalCycles;
+      document.getElementById('tabBadgeCycles').textContent = totalCycles;
+
+      if (totalCycles > 0) {
+        let totalLat = 0;
+        let successCount = 0;
+        timelineData.forEach(row => {
+          const lat = parseInt(row.response_time_ms) || 0;
+          totalLat += lat;
+          if (row.http_status === '200') successCount++;
+        });
+        const avgLat = Math.round(totalLat / totalCycles);
+        const healthPct = Math.round((successCount / totalCycles) * 100);
+        document.getElementById('kpiApiStatus').textContent = `${healthPct}%`;
+        document.getElementById('kpiAvgLatency').textContent = `Avg latency: ${avgLat} ms (${successCount}/${totalCycles} OK)`;
+      }
+    }
+
+    // Render Table 1: New Bookings
+    function renderNewBookingsTable() {
+      const tbody = document.getElementById('tbodyNewBookings');
+      const query = document.getElementById('searchNew').value.toLowerCase().trim();
+
+      const filtered = newBookingsData.filter(b => {
+        if (!query) return true;
+        return (
+          (b.booking_id && b.booking_id.toLowerCase().includes(query)) ||
+          (b.booking_custref && b.booking_custref.toLowerCase().includes(query)) ||
+          (b.passenger_name && b.passenger_name.toLowerCase().includes(query)) ||
+          (b.city_name && b.city_name.toLowerCase().includes(query))
+        );
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="empty-state">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              <p>No new bookings found matching your search.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(b => `
+        <tr>
+          <td class="mono-cell"><strong>#${b.booking_id || 'N/A'}</strong></td>
+          <td class="mono-cell" style="color: var(--text-muted);">${b.booking_custref || 'N/A'}</td>
+          <td><span class="badge badge-success">${b.current_status || 'NEW'}</span></td>
+          <td><strong>${b.passenger_name || 'N/A'}</strong></td>
+          <td>
+            <div style="max-width: 280px; font-size: 12px;">
+              <div>📍 <strong>From:</strong> ${b.pickup_location || 'N/A'}</div>
+              <div style="color: var(--text-muted);">🏁 <strong>To:</strong> ${b.drop_off_location || 'N/A'}</div>
+            </div>
+          </td>
+          <td><span class="badge badge-info">${b.flight_no || 'N/A'}</span></td>
+          <td class="timestamp-cell">${b.created_at || 'N/A'}</td>
+          <td class="timestamp-cell" style="color: #34d399;"><strong>${b.first_observed_at || 'N/A'}</strong></td>
+          <td>
+            <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="viewBookingJson('${b.booking_id}')">
+              🔍 View Raw JSON
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Render Table 2: Timeline
+    function renderTimelineTable() {
+      const tbody = document.getElementById('tbodyTimeline');
+      const query = document.getElementById('searchTimeline').value.toLowerCase().trim();
+
+      const filtered = timelineData.filter(row => {
+        if (!query) return true;
+        return (
+          row.cycle_number.includes(query) ||
+          row.http_status.includes(query) ||
+          (row.error_message && row.error_message.toLowerCase().includes(query))
+        );
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><p>No timeline records available yet.</p></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(row => {
+        let statusBadge = `<span class="badge badge-success">${row.http_status} OK</span>`;
+        if (row.http_status === '400' || row.http_status === '401' || row.http_status === '403') {
+          statusBadge = `<span class="badge badge-danger">${row.http_status} Auth/Client</span>`;
+        } else if (row.http_status.startsWith('5')) {
+          statusBadge = `<span class="badge badge-danger">${row.http_status} Server Err</span>`;
+        } else if (row.http_status === '408' || row.http_status === '0') {
+          statusBadge = `<span class="badge badge-warning">Timeout/Drop</span>`;
+        }
+
+        const newBadge = parseInt(row.new_bookings_detected) > 0
+          ? `<span class="badge badge-emerald" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: 700;">+${row.new_bookings_detected} NEW</span>`
+          : `<span style="color: var(--text-subtle);">0</span>`;
+
+        return `
+          <tr>
+            <td class="mono-cell">#${row.cycle_number}</td>
+            <td class="timestamp-cell">${row.poll_timestamp}</td>
+            <td>${statusBadge}</td>
+            <td class="mono-cell">${row.response_time_ms} ms</td>
+            <td><strong>${row.total_bookings_in_api}</strong></td>
+            <td>${newBadge}</td>
+            <td style="font-size: 12px; color: ${row.error_message ? '#fb7185' : 'var(--text-subtle)'};">
+              ${row.error_message || 'Healthy poll'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render Table 3: Seen IDs
+    function renderSeenIdsTable() {
+      const tbody = document.getElementById('tbodySeenIds');
+      const query = document.getElementById('searchSeen') ? document.getElementById('searchSeen').value.toLowerCase().trim() : '';
+      const entries = Object.entries(seenIdsData);
+
+      if (entries.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><p>No IDs registered yet.</p></td></tr>`;
+        return;
+      }
+
+      const filtered = entries.filter(([id, meta]) => {
+        if (!query) return true;
+        const pass = (meta.passenger_name || '').toLowerCase();
+        const ref = (meta.booking_custref || '').toLowerCase();
+        return id.includes(query) || pass.includes(query) || ref.includes(query);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="empty-state"><p>No tracked bookings match your search.</p></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(([id, meta]) => {
+        const isBaseline = meta.is_baseline !== false && (meta.first_observed_at === 'BASELINE_INITIAL' || meta.is_baseline === true);
+        const typeBadge = isBaseline
+          ? `<span class="badge badge-neutral">Baseline</span>`
+          : `<span class="badge badge-success">Live Alert</span>`;
+
+        const passName = meta.passenger_name || 'N/A';
+        const custRef = meta.booking_custref || 'N/A';
+        const status = meta.current_status || meta.booking_status || 'NEW';
+        const createdAt = meta.created_at || 'N/A';
+        const spottedAt = meta.first_observed_at || 'N/A';
+        const pickup = meta.pickup_location || 'N/A';
+        const dropoff = meta.drop_off_location || 'N/A';
+
+        return `
+          <tr>
+            <td class="mono-cell"><strong>#${id}</strong></td>
+            <td class="mono-cell" style="color: var(--text-muted);">${custRef}</td>
+            <td><span class="badge badge-info">${status}</span></td>
+            <td><strong>${passName}</strong></td>
+            <td>
+              <div style="max-width: 260px; font-size: 11px;">
+                <div>📍 ${pickup}</div>
+                <div style="color: var(--text-muted);">🏁 ${dropoff}</div>
+              </div>
+            </td>
+            <td class="timestamp-cell">${createdAt}</td>
+            <td class="timestamp-cell" style="color: #38bdf8;"><strong>${spottedAt}</strong></td>
+            <td>${typeBadge}</td>
+            <td>
+              <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="viewBookingJson('${id}')">
+                🔍 Raw JSON
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // View JSON Modal
+    function viewBookingJson(bookingId) {
+      let match = fullJsonlData.find(item => {
+        const b = item.raw_booking || item;
+        return String(b.booking_id) === String(bookingId) || String(b.id) === String(bookingId);
+      });
+
+      if (!match && seenIdsData[bookingId]) {
+        match = seenIdsData[bookingId].raw_booking || seenIdsData[bookingId];
+      }
+
+      const modal = document.getElementById('jsonModal');
+      const title = document.getElementById('modalTitle');
+      const content = document.getElementById('modalJsonContent');
+
+      title.textContent = `Booking #${bookingId} - Raw Payload`;
+      if (match) {
+        content.textContent = JSON.stringify(match, null, 2);
+      } else {
+        content.textContent = JSON.stringify({ message: "Payload record not cached in memory.", booking_id: bookingId }, null, 2);
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('jsonModal').style.display = 'none';
+    }
+
+    function copyModalJson() {
+      const text = document.getElementById('modalJsonContent').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 2000);
+      });
+    }
+
+    // Auto-refresh every 10 seconds
+    setInterval(loadAllData, 10000);
+
+    // Initial load
+    loadAllData();
+  </script>
+</body>
+</html>
